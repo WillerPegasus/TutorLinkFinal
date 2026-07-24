@@ -1,0 +1,152 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: tutorlink-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ab1234
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-pab1234"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - tutorlink-net
+
+  api-gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - tutorlink-net
+
+  auth-service:
+    build: ./auth-service
+    container_name: auth-service
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/tutorlink_auth
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: ab1234
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://api-gateway:8080/eureka/
+    depends_on:
+      mysql:
+        condition: service_healthy
+      api-gateway:
+        condition: service_started
+    networks:
+      - tutorlink-net
+
+  user-service:
+    build: ./user-service
+    container_name: user-service
+    restart: unless-stopped
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/tutorlink_users
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: ab1234
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://api-gateway:8080/eureka/
+    depends_on:
+      mysql:
+        condition: service_healthy
+      api-gateway:
+        condition: service_started
+    networks:
+      - tutorlink-net
+
+  tutor-service:
+    build: ./tutor-service
+    container_name: tutor-service
+    restart: unless-stopped
+    ports:
+      - "8083:8083"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/tutorlink_tutors
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: ab1234
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://api-gateway:8080/eureka/
+    depends_on:
+      mysql:
+        condition: service_healthy
+      api-gateway:
+        condition: service_started
+    networks:
+      - tutorlink-net
+
+  booking-service:
+    build: ./booking-service
+    container_name: booking-service
+    restart: unless-stopped
+    ports:
+      - "8084:8084"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/tutorlink_bookings
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: ab1234
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://api-gateway:8080/eureka/
+    depends_on:
+      mysql:
+        condition: service_healthy
+      api-gateway:
+        condition: service_started
+    networks:
+      - tutorlink-net
+
+  notification-service:
+    build: ./notification-service
+    container_name: notification-service
+    restart: unless-stopped
+    ports:
+      - "8085:8085"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/tutorlink_notifications
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: ab1234
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://api-gateway:8080/eureka/
+    depends_on:
+      mysql:
+        condition: service_healthy
+      api-gateway:
+        condition: service_started
+    networks:
+      - tutorlink-net
+
+  message-service:
+    build: ./message-service
+    container_name: message-service
+    restart: unless-stopped
+    ports:
+      - "8086:8086"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/tutorlink_messages
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: ab1234
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://api-gateway:8080/eureka/
+    depends_on:
+      mysql:
+        condition: service_healthy
+      api-gateway:
+        condition: service_started
+    networks:
+      - tutorlink-net
+
+networks:
+  tutorlink-net:
+    driver: bridge
+
+volumes:
+  mysql_data:

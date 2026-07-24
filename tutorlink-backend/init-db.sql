@@ -1,0 +1,6 @@
+CREATE DATABASE IF NOT EXISTS tutorlink_auth;
+CREATE DATABASE IF NOT EXISTS tutorlink_users;
+CREATE DATABASE IF NOT EXISTS tutorlink_tutors;
+CREATE DATABASE IF NOT EXISTS tutorlink_bookings;
+CREATE DATABASE IF NOT EXISTS tutorlink_notifications;
+CREATE DATABASE IF NOT EXISTS tutorlink_messages;

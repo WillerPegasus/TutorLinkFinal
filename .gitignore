@@ -1,0 +1,18 @@
+# Frontend
+tutorlink-frontend/node_modules/
+tutorlink-frontend/dist/
+tutorlink-frontend/tutorlink-frontend.tar.gz
+tutorlink-frontend/tutorlink-frontend.zip
+
+# Backend (Maven)
+tutorlink-backend/*/target/
+
+# Env & secrets
+.env
+.env.production
+*.env.local
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
